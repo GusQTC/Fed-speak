@@ -3,7 +3,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Read the example data into a DataFrame
-data = pd.read_csv('comparison_interest_sentiment_speeches.csv')
+data = pd.read_csv('economic_lexycon/comparison_interest_sentiment_speeches.csv')
 
 def categorize_change(change):
     if change > 0:
@@ -83,3 +83,7 @@ Predicted interest rate variation: 0.08385064779513893
 Mean squared error (MSE): 0.1664587426223797
 Mean absolute error (MAE): 0.23585597302016412
 '''
+#speeches change in interest rate
+### Predicted interest rate variation: 0.020440404521670744
+# Mean squared error (MSE): 0.1650770970403212
+# Mean absolute error (MAE): 0.23512486857260817

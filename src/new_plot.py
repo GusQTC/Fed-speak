@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-df = pd.read_csv('comparison_interest_sentiment_speeches.csv', index_col= 1, parse_dates=True)
+df = pd.read_csv('economic_lexycon/result_lexycon_speeches_economic.csv', index_col= 1, parse_dates=True)
 
 
 fig, ax1 = plt.subplots()

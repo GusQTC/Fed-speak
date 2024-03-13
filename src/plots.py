@@ -12,7 +12,7 @@ fred = Fred(api_key=FRED_API_KEY)
 
 
 # Read the file into a DataFrame
-df = pd.read_csv('result_lexycon_speeches.csv')
+df = pd.read_csv('economic_lexycon/result_lexycon_speeches_economic.csv')
 
 #df = df[df['File'].str.contains('monetary')]
 #df = df[df['File'].str.contains('fomcminutes')]
@@ -55,12 +55,12 @@ df_agg.index = df_agg.index.values.astype('datetime64[M]')
 
 df_agg = pd.merge(df_agg, interest_rate, left_index=True, right_index=True, how='left')
 
-
+df_agg['Interest Rate Change'] = df_agg['Interest Rate'].pct_change()
 # Set 'File' as the index
 
 
 
-df_agg.to_csv('comparison_interest_sentiment_speeches.csv', sep=',', index=True)
+df_agg.to_csv('economic_lexycon/comparison_interest_sentiment_speeches.csv', sep=',', index=True)
 
 fig, ax1 = plt.subplots()
 
@@ -73,11 +73,13 @@ ax1.tick_params(axis='y', labelcolor='blue')
 ax2 = ax1.twinx()
 
 # Plot the 'Interest Rate' column on the second y-axis
-ax2.plot(df_agg['Interest Rate'], color='red')
-ax2.set_ylabel('Interest Rate', color='red')
+ax2.plot(df_agg['Interest Rate Change'], color='red')
+ax2.set_ylabel('Interest Rate Change', color='red')
 ax2.tick_params(axis='y', labelcolor='red')
 
 #ax2.plot(df_agg['Interest Rate Change'], color='green')
 
 # Show the plot
 plt.show()
+
+plt.savefig('economic_lexycon/interest_change_speeches.png')
