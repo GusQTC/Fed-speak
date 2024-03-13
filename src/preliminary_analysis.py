@@ -6,6 +6,8 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import pandas as pd
 
+from collections import Counter, defaultdict
+
 # Download NLTK resources (only required for the first run)
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -38,6 +40,15 @@ def preprocess_and_tokenize(text):
     return tokens
 
 
+def calculate_word_frequencies(tokens):
+    # Calculate word frequencies
+    word_frequencies = Counter(tokens)
+    
+    # Calculate word densities
+    word_densities = {word: count / len(tokens) for word, count in word_frequencies.items()}
+    
+    return word_frequencies, word_densities
+
 def calculate_sentiment_score(tokens, df_dict):
     sentiment_score = 0
 
@@ -45,11 +56,12 @@ def calculate_sentiment_score(tokens, df_dict):
     for token in tokens:
         token_sentiment = 0
 
-        if token in df_dict['Word'].values:
-            #token_sentiment += df_dict[df_dict['token'] == token]['sentiment'].values[0]
+        #if token in df_dict['Word'].values:
+        if token in df_dict['token'].values:
+            token_sentiment += df_dict[df_dict['token'] == token]['sentiment'].values[0]
 
-            token_sentiment += df_dict[df_dict['Word'] == token]['Positive'].values[0]
-            token_sentiment -= df_dict[df_dict['Word'] == token]['Negative'].values[0]
+            #token_sentiment += df_dict[df_dict['Word'] == token]['Positive'].values[0]
+            #token_sentiment -= df_dict[df_dict['Word'] == token]['Negative'].values[0]
 
 
         sentiment_score += token_sentiment
@@ -61,6 +73,7 @@ dir = 'speeches'
 # Example usage
 
 result = pd.DataFrame(columns=['File', 'Value'])
+yearly_word_frequencies = defaultdict(Counter)
 
 for file in os.listdir(dir):
 
@@ -68,7 +81,14 @@ for file in os.listdir(dir):
 
     text = open(f'{dir}/{file}', 'r', encoding='utf8').read()
     text_tokens = preprocess_and_tokenize(text)
-    sentiment_score_economic = calculate_sentiment_score(text_tokens, df_dict_big)
-    print(f'{file}: {sentiment_score_economic}')
-    result = pd.concat([result, pd.DataFrame({'File': [file], 'Value': [sentiment_score_economic]})])
-    result.to_csv('result_lexycon_speeches.csv', sep=',', index=False)
+    #sentiment_score_economic = calculate_sentiment_score(text_tokens, economic_dict)
+    word_frequencies, word_densities = calculate_word_frequencies(text_tokens)
+    year = file[-17:-13]
+    yearly_word_frequencies[year] += word_frequencies
+    #print(f'{file}: {sentiment_score_economic}')
+    #result = pd.concat([result, pd.DataFrame({'File': [file], 'Value': [sentiment_score_economic]})])
+    #result.to_csv('result_lexycon_speeches_economic.csv', sep=',', index=False)
+
+    for year, frequencies in yearly_word_frequencies.items():
+        print(f'{year}: {file}')
+        pd.DataFrame(frequencies.most_common(100)).to_csv(f'word_frequency_speeches/economic_{year}.csv', sep=',', index=False)
