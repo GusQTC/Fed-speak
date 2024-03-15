@@ -1,2 +1,7 @@
 fomc_text
 speeches
+fomc_monetary
+fomc_minutes
+word_frequency_minutes
+word_frequency_speeches
+wordcloud

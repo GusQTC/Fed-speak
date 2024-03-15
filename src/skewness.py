@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-df = pd.read_csv('economic_lexycon/result_lexycon_speeches_economic.csv')
+df = pd.read_csv('tokens/result_minutes_economic.csv')
 
 
 # Calculate skewness

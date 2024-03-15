@@ -67,6 +67,10 @@ def scrape_fomc_data(url, save_path):
 
                     path = os.path.join(save_path, filename)
 
+                    
+                    #    Remove links
+                    text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
+
                     # Save the content as a text file
                     with open(f'{path}.txt', 'w', encoding="utf-8") as file:
                         file.write(text)

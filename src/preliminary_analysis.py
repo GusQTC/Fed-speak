@@ -51,7 +51,8 @@ def calculate_word_frequencies(tokens):
 
 def calculate_sentiment_score(tokens, df_dict):
     sentiment_score = 0
-
+    positive_count = 0
+    negative_count = 0
     # Iterate through each token
     for token in tokens:
         token_sentiment = 0
@@ -60,19 +61,25 @@ def calculate_sentiment_score(tokens, df_dict):
         if token in df_dict['token'].values:
             token_sentiment += df_dict[df_dict['token'] == token]['sentiment'].values[0]
 
+            if token_sentiment > 0:
+                positive_count += 1
+            elif token_sentiment < 0:
+                negative_count += 1
+
             #token_sentiment += df_dict[df_dict['Word'] == token]['Positive'].values[0]
             #token_sentiment -= df_dict[df_dict['Word'] == token]['Negative'].values[0]
 
 
         sentiment_score += token_sentiment
 
-    return sentiment_score
+    return sentiment_score, positive_count, negative_count
 
 dir = 'speeches'
 
 # Example usage
 
-result = pd.DataFrame(columns=['File', 'Value'])
+result = pd.DataFrame(columns=['Value'])
+count = pd.DataFrame(columns=['Positive', 'Negative'])
 yearly_word_frequencies = defaultdict(Counter)
 
 for file in os.listdir(dir):
@@ -81,13 +88,19 @@ for file in os.listdir(dir):
 
     text = open(f'{dir}/{file}', 'r', encoding='utf8').read()
     text_tokens = preprocess_and_tokenize(text)
-    #sentiment_score_economic = calculate_sentiment_score(text_tokens, economic_dict)
+    sentiment_score_economic, positives, negatives = calculate_sentiment_score(text_tokens, economic_dict)
     word_frequencies, word_densities = calculate_word_frequencies(text_tokens)
-    year = file[-17:-13]
+    year = file[0:4]
+    date = file[0:-4]
     yearly_word_frequencies[year] += word_frequencies
-    #print(f'{file}: {sentiment_score_economic}')
-    #result = pd.concat([result, pd.DataFrame({'File': [file], 'Value': [sentiment_score_economic]})])
-    #result.to_csv('result_lexycon_speeches_economic.csv', sep=',', index=False)
+
+    print(f'{file}: {sentiment_score_economic}')
+
+    count = pd.concat([count, pd.DataFrame({'Positive':[positives], 'Negative': [negatives]})])
+    count.to_csv(f'tokens/count_{dir}_economic.csv', sep=',', index=False)
+
+    result = pd.concat([result, pd.DataFrame({'Date': [date], 'Value': [sentiment_score_economic]})])
+    result.to_csv(f'tokens/result_{dir}_economic.csv', sep=',', index=False)
 
     for year, frequencies in yearly_word_frequencies.items():
         print(f'{year}: {file}')
