@@ -74,7 +74,7 @@ def calculate_sentiment_score(tokens, df_dict):
 
     return sentiment_score, positive_count, negative_count
 
-dir = 'speeches'
+dir = 'statements'
 
 # Example usage
 
@@ -90,6 +90,7 @@ for file in os.listdir(dir):
     text_tokens = preprocess_and_tokenize(text)
     sentiment_score_economic, positives, negatives = calculate_sentiment_score(text_tokens, economic_dict)
     word_frequencies, word_densities = calculate_word_frequencies(text_tokens)
+    file = file.replace('monetary', '')
     year = file[0:4]
     date = file[0:-4]
     yearly_word_frequencies[year] += word_frequencies

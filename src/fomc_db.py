@@ -8,7 +8,7 @@ def get_urls(url):
 
     response = requests.get(url, timeout=50)
     soup = BeautifulSoup(response.content, 'html.parser')
-    url_links = soup.find_all('a',href=lambda href: href and re.match(r"/monetarypolicy/(?!files)", href, re.IGNORECASE))
+    url_links = soup.find_all('a',href=lambda href: href and re.match(r"/newsevents/pressreleases/", href, re.IGNORECASE))
     urls = [link['href'] for link in url_links]
     return urls
 
@@ -23,11 +23,12 @@ def extract_text_from_url(url):
     content = response.content
     soup = BeautifulSoup(content, 'html.parser')
     # Find the main content element
-    #main_content = soup.find('div', id='article') # for the FOMC minutes <div id="article" class="col-xs-12 col-sm-8 col-md-9">
-    main_content = soup.find_all('p')
-    article_content = ""
-    for p in main_content:	
-        article_content += p.get_text(separator='\n', strip=True)
+    main_content = soup.find('div', id='article') # for the FOMC minutes <div id="article" class="col-xs-12 col-sm-8 col-md-9">
+    article_content = main_content.get_text(separator='\n', strip=True)
+    #main_content = soup.find_all('p')
+    #article_content = ""
+    #for p in main_content:	
+    #    article_content += p.get_text(separator='\n', strip=True)
 
     # Get the text from the main content element
     #text = main_content.get_text(separator='\n', strip=True)
@@ -63,7 +64,7 @@ def scrape_fomc_data(url, save_path):
     # Loop through each link
     for fed_link in fed_links:
 
-        url_speach = "https://www.federalreserve.gov" + link['href']
+        url_speach = "https://www.federalreserve.gov" + fed_link['href']
 
         response_yearly = requests.get(url_speach, timeout=50)
 
@@ -90,7 +91,7 @@ def scrape_fomc_data(url, save_path):
                     # Extract the filename from the URL
                     filename = href.split('/')[-1]
 
-                    link_path = link['href'].split('/')[-1]
+                    link_path = article['href'].split('/')[-1]
                     year = link_path.split('-')[0]
 
                     soup_article = BeautifulSoup(data_response.content, 'html.parser')
@@ -116,40 +117,58 @@ def scrape_fomc_data(url, save_path):
                         print(f"Saved: {filename}")
 
 # Dynamic URL input
-fomc_url = "https://www.federalreserve.gov/monetarypolicy/materials/"
+fomc_url = "https://www.federalreserve.gov/newsevents/pressreleases.htm"
 
 # Define the path to save the scraped data
-save_directory = "fomc_minutes"
+save_directory = "monetary"
 
 # Create the directory if it doesn't exist
 if not os.path.exists(save_directory):
     os.makedirs(save_directory)
 
+year_urls = get_urls(fomc_url)
+for url in year_urls:
+    if re.match(r"/newsevents/pressreleases/monetary\d{8}[a-z].htm", url, re.IGNORECASE):
+        text = extract_text_from_url(url)
+        with open(f'{save_directory}/{url.split("/")[-1]}.txt', 'w', encoding='utf8') as file:
+            file.write(text)
+            print(f"Saved: {url.split('/')[-1]}")
+    elif re.match(r"/newsevents/pressreleases/2\d{3}all.htm", url, re.IGNORECASE):
+        text = extract_text_from_url(url)
+        with open(f'{save_directory}/{url.split("/")[-1]}.txt', 'w', encoding='utf8') as file:
+            file.write(text)
+            print(f"Saved: {url.split('/')[-1]}")
+    else:
+        print(f"Skipping: {url}")
 # Scrape the FOMC data and save it locally
 #scrape_fomc_data(fomc_url, save_directory)
     
 
 
 #https://www.federalreserve.gov/monetarypolicy/fomchistorical20{value}.htm
-    
-for value in ["18", "17", "16", "15", "14", "13", "12", "11", "10", "09", "08", "07", "06", "05", "04", "03", "02", "01", "00"]:
-    main_url = f"https://www.federalreserve.gov/monetarypolicy/fomchistorical20{value}.htm"
-    file = f"fomc_historical_{value}.txt"
-    links = get_urls(main_url)
 
-    for link in links:
-            
-        if link and re.match(r"/monetarypolicy/fomcminutes\d{8}.htm", link, re.IGNORECASE):
+def get_historical_data(save_directory):
+    for value in ["18", "17", "16", "15", "14", "13", "12", "11", "10", "09", "08", "07", "06", "05", "04", "03", "02", "01", "00"]:
+        main_url = f"https://www.federalreserve.gov/monetarypolicy/fomchistorical20{value}.htm"
+        file = f"fomc_historical_{value}.txt"
+        year_links = get_urls(main_url)
 
-            link = "https://www.federalreserve.gov" + link
-            date = link.split('/')[-1].split('.')[0]
-            savename = f'fomc_minutes{date}.htm.txt'
-            already_saved = os.listdir(save_directory)
+        for link in year_links:
+                
+            if re.match(r"/newsevents/pressreleases/monetary\d{8}[a-z].htm", link, re.IGNORECASE):
 
-            if savename in already_saved:
-                break
-            text = extract_text_from_url(link)
+                link = "https://www.federalreserve.gov" + link
+                date = link.split('/')[-1].split('.')[0]
+                date = date.split('monetary')[1]
+                date = date.split('.')[0]
 
-            with open(f'fomc_minutes/{savename}.htm.txt', 'w', encoding='utf8') as file:
-                file.write(text)
-                print(f"Saved: {savename}")
+                savename = f'{date}'
+                already_saved = os.listdir(save_directory)
+
+                if savename in already_saved:
+                    break
+                text = extract_text_from_url(link)
+
+                with open(f'{save_directory}/{savename}.htm.txt', 'w', encoding='utf8') as file:
+                    file.write(text)
+                    print(f"Saved: {savename}")
