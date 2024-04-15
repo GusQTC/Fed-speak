@@ -5,7 +5,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import pandas as pd
-
+import zlib
+import base64
 from collections import Counter, defaultdict
 
 # Download NLTK resources (only required for the first run)
@@ -74,35 +75,35 @@ def calculate_sentiment_score(tokens, df_dict):
 
     return sentiment_score, positive_count, negative_count
 
-dir = 'statements'
+dirs = ['compressed_statements', "compressed_speeches", 'compressed_fomc_minutes' ]
 
 # Example usage
 
-result = pd.DataFrame(columns=['Value'])
-count = pd.DataFrame(columns=['Positive', 'Negative'])
+result = pd.DataFrame(columns=['File', 'Word Count', 'Positive', 'Negative', 'sentiment_score_economic', 'Year', 'Month'])
 yearly_word_frequencies = defaultdict(Counter)
+for current_dir in dirs:
+    for file in os.listdir(current_dir):
 
-for file in os.listdir(dir):
+        file.replace('.htm.txt', 'txt')
 
-    file.replace('.htm.txt', 'txt')
+        text = open(f'{current_dir}/{file}', 'r', encoding='utf8').read()
 
-    text = open(f'{dir}/{file}', 'r', encoding='utf8').read()
-    text_tokens = preprocess_and_tokenize(text)
-    sentiment_score_economic, positives, negatives = calculate_sentiment_score(text_tokens, economic_dict)
-    word_frequencies, word_densities = calculate_word_frequencies(text_tokens)
-    file = file.replace('monetary', '')
-    year = file[0:4]
-    date = file[0:-4]
-    yearly_word_frequencies[year] += word_frequencies
+        decompressed = zlib.decompress(base64.b64decode(text.encode())).decode()
 
-    print(f'{file}: {sentiment_score_economic}')
+        text_tokens = preprocess_and_tokenize(decompressed)
+        sentiment_score_economic, positives, negatives = calculate_sentiment_score(text_tokens, economic_dict)
+        word_frequencies, word_densities = calculate_word_frequencies(text_tokens)
 
-    count = pd.concat([count, pd.DataFrame({'Positive':[positives], 'Negative': [negatives]})])
-    count.to_csv(f'tokens/count_{dir}_economic.csv', sep=',', index=False)
+        word_count = len(text_tokens)
 
-    result = pd.concat([result, pd.DataFrame({'Date': [date], 'Value': [sentiment_score_economic]})])
-    result.to_csv(f'tokens/result_{dir}_economic.csv', sep=',', index=False)
+        #get only the numbers in the file name
+        file = re.sub('[^0-9]', '', file)
+        year = file[0:4]
+        date = file[0:-4]
+        # month
+        month = file[4:6]
 
-    for year, frequencies in yearly_word_frequencies.items():
-        print(f'{year}: {file}')
-        pd.DataFrame(frequencies.most_common(100)).to_csv(f'word_frequency_speeches/economic_{year}.csv', sep=',', index=False)
+        print(f'{file}: {sentiment_score_economic}')
+
+        result = pd.concat([result, pd.DataFrame([[file, word_count, positives, negatives, sentiment_score_economic, year, month]], columns=['File', 'Word Count','Positive', 'Negative', 'sentiment_score_economic', 'Year', 'Month'])])
+        result.to_csv(f'values/result_economic.csv', sep=',', index=False)

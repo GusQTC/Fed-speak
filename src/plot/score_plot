@@ -1,0 +1,62 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from fredapi import Fred
+
+from scipy import stats
+
+
+# Load the CSV data into a pandas DataFrame
+df = pd.read_csv('values/result_economic_corrected.csv')
+
+#normalize sentiment score
+#using min-max normalization
+df['Mean_Sentiment_Score_Corrected'] = (df['Mean_Sentiment_Score_Corrected'] - df['Mean_Sentiment_Score_Corrected'].min()) / (df['Mean_Sentiment_Score_Corrected'].max() - df['Mean_Sentiment_Score_Corrected'].min())
+
+
+FRED_API_KEY= "55ddb1dfa49988e7cd6ecaa8095a5143"
+fred = Fred(api_key=FRED_API_KEY)
+# get economic data
+
+interest_rate = fred.get_series('FEDFUNDS', observation_start='01/01/2000', observation_end='01/01/2024' )
+
+treasury_rate = fred.get_series('DGS10', observation_start='01/01/2000', observation_end='01/01/2024' )
+
+inflation_rate = fred.get_series('CPIAUCSL', observation_start='01/01/2000', observation_end='01/01/2024' )
+
+#unemploymenbt
+unemployment_rate = fred.get_series('UNRATE', observation_start='01/01/2000', observation_end='01/01/2024' )
+
+#gdp
+gdp = fred.get_series('GDP', observation_start='01/01/2000', observation_end='01/01/2024' )
+
+inflation_rate_change = inflation_rate.pct_change()
+unemployment_rate = unemployment_rate.pct_change()
+gdp = gdp.pct_change()
+
+
+
+
+# Resample each series to the start of the month and calculate the mean
+interest_rate_resampled = interest_rate.resample('MS').mean()
+interest_rate_change = interest_rate_resampled.pct_change()
+treasury_rate_resampled = treasury_rate.resample('MS').mean()
+inflation_rate_resampled = inflation_rate.resample('MS').mean()*100
+unemployment_rate_resampled = unemployment_rate.resample('MS').mean()
+
+#GDP IS QUATERLY so resample differently, copying the value to the next 2 months
+gdp_resampled = gdp.resample('MS').ffill()
+
+# Combine the resampled series into a DataFrame
+economic_data = pd.DataFrame({'Interest Rate': interest_rate_resampled,'Interest Rate Change': interest_rate_change , 'Treasury Rate': treasury_rate_resampled, 'Inflation Rate': inflation_rate_resampled, 'GDP Change': gdp_resampled, 'Unemployment Rate': unemployment_rate_resampled})
+
+
+# Merge the economic data with the sentiment data
+df['Date'] = pd.to_datetime(df['Date'])
+economic_data['Date'] = economic_data.index
+merged_data = pd.merge(df, economic_data, on='Date', how='inner')
+
+#drop na
+merged_data = merged_data.dropna()
+print(merged_data.head())
+merged_data.to_csv('values/merged_data.csv', index=False)
+
