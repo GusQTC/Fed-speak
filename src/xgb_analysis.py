@@ -20,10 +20,11 @@ target = 'Interest Rate Change'
 X = df[features]
 y = df[target] * 100  # to get the percentage
 
+
 #y, lambda_val = stats.yeojohnson(y)
 
 # Split the data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, shuffle=True)
 
 
 # Define the model
@@ -54,7 +55,7 @@ print(f'Best parameters: {best_parameters}')
 # Train the model with the best parameters
 best_model = XGBRegressor(**best_parameters)
 
-filename = 'finalized_model.pkl'
+filename = 'new_model.pkl'
 pickle.dump(best_model, open(filename, 'wb'))
 
 best_model.fit(X_train, y_train, early_stopping_rounds=10, eval_set=[(X_test, y_test)])

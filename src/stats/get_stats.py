@@ -13,8 +13,9 @@ CPI = fred.get_series('CPIAUCSL', observation_start='01/01/2019')
 
 Employment = fred.get_series('PAYEMS', observation_start='01/01/2019')
 
+interest_rate_change = interest_rate.diff()
 
-data = pd.DataFrame({'Interest Rate': interest_rate, 'GDP': GDP, 'CPI': CPI, 'Employment': Employment})
+data = pd.DataFrame({'Interest Rate': interest_rate, 'Interest Change':interest_rate_change, 'GDP': GDP, 'CPI': CPI, 'Employment': Employment})
 
-with open('economic_data.csv', 'w') as f:
-    data.to_csv(f)
+
+print(data)
