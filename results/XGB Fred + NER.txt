@@ -1,0 +1,31 @@
+XGB Fred + NER
+ MAE: 11.013016032276418, MSE: 665.7754329109133, RMSE: 25.802624535324178
+                             feature  importance
+5             Median_Sentiment_Score    0.111263
+8            Mean_Positive_Corrected    0.089229
+24                    inflation_rate    0.075782
+7     Mean_Sentiment_Score_Corrected    0.066724
+6             StdDev_Sentiment_Score    0.058223
+4               Mean_Sentiment_Score    0.052461
+1                    Mean_Word_Count    0.042032
+9            Mean_Negative_Corrected    0.041378
+15                       WORK_OF_ART    0.034905
+23                     treasury_rate    0.034495
+27                           S&P-500    0.034366
+14                            PERSON    0.032453
+22                          LANGUAGE    0.031870
+25                 unemployment_rate    0.031179
+18                               LOC    0.029403
+20                               FAC    0.028966
+19                               LAW    0.028896
+13                               GPE    0.027883
+3                      Mean_Negative    0.026484
+16                           PRODUCT    0.023643
+10  Median_Sentiment_Score_Corrected    0.018753
+17                              NORP    0.016774
+11  StdDev_Sentiment_Score_Corrected    0.016463
+0                    Mean_File_Count    0.014337
+12                               ORG    0.014292
+26                        gdp_growth    0.008443
+2                      Mean_Positive    0.006919
+21                             EVENT    0.002383
