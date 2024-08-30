@@ -12,17 +12,17 @@ df['Month'] = df['Month'].astype(int)
 FRED_API_KEY= "55ddb1dfa49988e7cd6ecaa8095a5143"
 fred = Fred(api_key=FRED_API_KEY)
 
-interest_rate = fred.get_series('FEDFUNDS', observation_start='01/01/2013', observation_end='01/01/2024' )
+interest_rate = fred.get_series('FEDFUNDS', observation_start='01/01/2000', observation_end='01/01/2024' )
 
-treasury_rate = fred.get_series('DGS10', observation_start='01/01/2013', observation_end='01/01/2024' )
+treasury_rate = fred.get_series('DGS10', observation_start='01/01/2000', observation_end='01/01/2024' )
 
-inflation_rate = fred.get_series('CPIAUCSL', observation_start='01/01/2013', observation_end='01/01/2024' )
+inflation_rate = fred.get_series('CPIAUCSL', observation_start='01/01/2000', observation_end='01/01/2024' )
 
-unemployment_rate = fred.get_series('UNRATE', observation_start='01/01/2013', observation_end='01/01/2024' )
+unemployment_rate = fred.get_series('UNRATE', observation_start='01/01/2000', observation_end='01/01/2024' )
 
-gpd = fred.get_series('GDP', observation_start='01/01/2013', observation_end='01/01/2024' )
+gpd = fred.get_series('GDP', observation_start='01/01/2000', observation_end='01/01/2024' )
 
-stocks = fred.get_series('SP500', observation_start='01/01/2013', observation_end='01/01/2024' )
+stocks = fred.get_series('SP500', observation_start='01/01/2000', observation_end='01/01/2024' )
 print(inflation_rate)
 print(inflation_rate)
 
